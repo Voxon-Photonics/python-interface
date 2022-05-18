@@ -1,3 +1,4 @@
+#! /usr/bin/env python -dOt
 # -*- coding: utf-8 -*-
 """
 Created on Wed Oct 28 15:30:05 2020
