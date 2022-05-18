@@ -9,7 +9,19 @@ Created on Wed Oct 28 15:30:05 2020
 from ctypes import Structure, c_float, c_int, c_double, c_void_p, c_char_p, WinDLL, byref, POINTER
 
 # Maximum number of displays supported
-MAXDISP =  3 
+MAXDISP =  3
+# Distance from edge of volume to draw bounding lines
+BOX_INSET = 0.001
+# Color : White as int
+WHITE = 0xffffff
+# Draw mesh flags
+'''	flags: 	+0:dots, +1:lines, +2:surfaces, +3:solid, +8:texnam is tiletype * instead of filename
+			+16:scale col by vt[i].col for surfaces '''
+MESH_FLAG = 2
+BOX_FLAG = 1
+# Key Values
+ESC_KEY = 0x1
+
 
 class POINT2D(Structure):
 	_fields_ = [("x", c_float),
@@ -172,7 +184,7 @@ class Runtime:
 	# Does work as a loop; better to have consumer as loop?
 	def Loop(self):
 		while (self.vxDLL.voxie_breath(byref(self.in_t)) == 0):
-			if self.vxDLL.voxie_keystat(0x1):
+			if self.vxDLL.voxie_keystat(ESC_KEY):
 				self.vxDLL.voxie_quitloop();
 			
 			self.vxDLL.voxie_frame_start(byref(self.vf));
@@ -187,17 +199,17 @@ class Runtime:
 			
 			self.vxDLL.voxie_drawbox(
 					byref(self.vf), 
-					aspx_min + 0.001, 
-					aspy_min + 0.001, 
+					aspx_min + BOX_INSET, 
+					aspy_min + BOX_INSET, 
 					aspz_min, 
-					aspx_max - 0.001, 
-					aspy_max - 0.001, 
+					aspx_max - BOX_INSET, 
+					aspy_max - BOX_INSET, 
 					aspz_max, 
-					1, 0xffffff);
+					BOX_FLAG, WHITE);
 					
 			for mesh in self.activeMeshes.values():
 				# Perform object transformations here
-				self.vxDLL.voxie_drawmeshtex(byref(self.vf), None, mesh.Pol, mesh.PCount, mesh.IDX, mesh.ICount, 2, 0xffffff)
+				self.vxDLL.voxie_drawmeshtex(byref(self.vf), None, mesh.Pol, mesh.PCount, mesh.IDX, mesh.ICount, MESH_FLAG, WHITE)
             
 			self.vxDLL.voxie_frame_end();
 			self.vxDLL.voxie_getvw(byref(self.vw));
